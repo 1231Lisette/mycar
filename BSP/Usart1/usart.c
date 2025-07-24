@@ -1,23 +1,26 @@
 #include "usart.h"	  
-
+/* usart.c */
+volatile uint8_t dbg_cmd_ready = 0;
+volatile  uint8_t test_flag;
+char dbg_cmd_buf[50];
 //////////////////////////////////////////////////////////////////
-//¼ÓÈëÒÔÏÂ´úÂë,Ö§³Öprintfº¯Êý,¶ø²»ÐèÒªÑ¡Ôñuse MicroLIB	
+//åŠ å…¥ä»¥ä¸‹ä»£ç ,æ”¯æŒprintfå‡½æ•°,è€Œä¸éœ€è¦é€‰æ‹©use MicroLIB	
 //Add the following code to support the printf function without selecting use MicroLIB
 #if 1
 #pragma import(__use_no_semihosting)             
-//±ê×¼¿âÐèÒªµÄÖ§³Öº¯Êý   Support functions required by the standard library
+//æ ‡å‡†åº“éœ€è¦çš„æ”¯æŒå‡½æ•°   Support functions required by the standard library
 struct __FILE 
 { 
 	int handle; 
 }; 
 
 FILE __stdout;       
-//¶¨Òå_sys_exit()ÒÔ±ÜÃâÊ¹ÓÃ°ëÖ÷»úÄ£Ê½  Define _sys_exit() to avoid using semihosting mode
+//å®šä¹‰_sys_exit()ä»¥é¿å…ä½¿ç”¨åŠä¸»æœºæ¨¡å¼  Define _sys_exit() to avoid using semihosting mode
 void _sys_exit(int x) 
 { 
 	x = x; 
 } 
-//ÖØ¶¨Òåfputcº¯Êý Redefine fputc function
+//é‡å®šä¹‰fputcå‡½æ•° Redefine fputc function
 int fputc(int ch, FILE *f)
 {      
 	  while((USART1->SR&0X40)==0);
@@ -25,60 +28,60 @@ int fputc(int ch, FILE *f)
 	return ch;
 }
 #endif 
+
 /**************************************************************************
 Function: Serial port 1 initialization
-Input   : bound£ºBaud rate
+Input   : boundï¼šBaud rate
 Output  : none
-º¯Êý¹¦ÄÜ£º´®¿Ú1³õÊ¼»¯
-Èë¿Ú²ÎÊý£ºbound£º²¨ÌØÂÊ
-·µ»Ø  Öµ£ºÎÞ
+å‡½æ•°åŠŸèƒ½ï¼šä¸²å£1åˆå§‹åŒ–
+å…¥å£å‚æ•°ï¼šboundï¼šæ³¢ç‰¹çŽ‡
+è¿”å›ž  å€¼ï¼šæ— 
 **************************************************************************/
-void uart_init(u32 bound)
+     
+void uart_init(u32 bound)//usart1
 {
-  //GPIO¶Ë¿ÚÉèÖÃ	 GPIO port settings
-  GPIO_InitTypeDef GPIO_InitStructure;
+  //GPIOç«¯å£è®¾ç½®	 GPIO port settings
+	GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure; 
 	
-	 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1|RCC_APB2Periph_GPIOA, ENABLE);	//Ê¹ÄÜUSART1£¬GPIOAÊ±ÖÓ	Enable USART1, GPIOA clock
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1|RCC_APB2Periph_GPIOA, ENABLE);	//ä½¿èƒ½USART1ï¼ŒGPIOAæ—¶é’Ÿ	Enable USART1, GPIOA clock
   
-	//USART1_TX   GPIOA.9
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9; //PA.9
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;	//¸´ÓÃÍÆÍìÊä³ö	Multiplexed push-pull output
-  GPIO_Init(GPIOA, &GPIO_InitStructure);//³õÊ¼»¯GPIOA.9	Initialize GPIOA.9
+		//USART1_TX   GPIOA.9
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9; //PA.9
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;	//å¤ç”¨æŽ¨æŒ½è¾“å‡º	Multiplexed push-pull output
+	GPIO_Init(GPIOA, &GPIO_InitStructure);//åˆå§‹åŒ–GPIOA.9	Initialize GPIOA.9
+	   
+	  //USART1_RX	  GPIOA.10
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;//PA10
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;//æµ®ç©ºè¾“å…¥	Floating Input
+	GPIO_Init(GPIOA, &GPIO_InitStructure);//åˆå§‹åŒ–GPIOA.10  Initialize GPIOA.10
    
-  //USART1_RX	  GPIOA.10
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;//PA10
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;//¸¡¿ÕÊäÈë	Floating Input
-  GPIO_Init(GPIOA, &GPIO_InitStructure);//³õÊ¼»¯GPIOA.10  Initialize GPIOA.10
-   //USART ³õÊ¼»¯ÉèÖÃ	USART initialization settings
+  //USART åˆå§‹åŒ–è®¾ç½®	USART initialization settings
+	USART_InitStructure.USART_BaudRate = bound;//ä¸²å£æ³¢ç‰¹çŽ‡	Serial port baud rate
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;//å­—é•¿ä¸º8ä½æ•°æ®æ ¼å¼	The word length is 8-bit data format
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;//ä¸€ä¸ªåœæ­¢ä½	One stop bit
+	USART_InitStructure.USART_Parity = USART_Parity_No;//æ— å¥‡å¶æ ¡éªŒä½	No parity bit
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;//æ— ç¡¬ä»¶æ•°æ®æµæŽ§åˆ¶	No hardware flow control
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//æ”¶å‘æ¨¡å¼	Transceiver mode
 
-	USART_InitStructure.USART_BaudRate = bound;//´®¿Ú²¨ÌØÂÊ	Serial port baud rate
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;//×Ö³¤Îª8Î»Êý¾Ý¸ñÊ½	The word length is 8-bit data format
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;//Ò»¸öÍ£Ö¹Î»	One stop bit
-	USART_InitStructure.USART_Parity = USART_Parity_No;//ÎÞÆæÅ¼Ð£ÑéÎ»	No parity bit
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;//ÎÞÓ²¼þÊý¾ÝÁ÷¿ØÖÆ	No hardware flow control
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//ÊÕ·¢Ä£Ê½	Transceiver mode
-
-  USART_Init(USART1, &USART_InitStructure); //³õÊ¼»¯´®¿Ú1	Initialize serial port 1
-  USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);//¹Ø±Õ´®¿Ú½ÓÊÜÖÐ¶Ï	Disable serial port receive interrupt
-  USART_Cmd(USART1, ENABLE);                    //Ê¹ÄÜ´®¿Ú1 	Enable serial port 1
-	
-	
 	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
+ 
+	USART_Init(USART1, &USART_InitStructure); //åˆå§‹åŒ–ä¸²å£1	Initialize serial port 1
+	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);//ä¸²å£æŽ¥å—ä¸­æ–­	Disable serial port receive interrupt
+	USART_Cmd(USART1, ENABLE);                    //ä½¿èƒ½ä¸²å£1 	Enable serial port 1
 
 }
 
 /**
- * @Brief: UART1·¢ËÍÊý¾Ý		UART1 sends data
+ * @Brief: UART1å‘é€æ•°æ®		UART1 sends data
  * @Note: 
- * @Parm: ch:´ý·¢ËÍµÄÊý¾Ý 	ch: data to be sent
+ * @Parm: ch:å¾…å‘é€çš„æ•°æ® 	ch: data to be sent
  * @Retval: 
  */
 void USART1_Send_U8(uint8_t ch)
@@ -88,9 +91,9 @@ void USART1_Send_U8(uint8_t ch)
 }
 
 /**
- * @Brief: UART1·¢ËÍÊý¾Ý		UART1 sends data
+ * @Brief: UART1å‘é€æ•°æ®		UART1 sends data
  * @Note: 
- * @Parm: BufferPtr:´ý·¢ËÍµÄÊý¾Ý  Length:Êý¾Ý³¤¶È		BufferPtr: data to be sent Length: data length
+ * @Parm: BufferPtr:å¾…å‘é€çš„æ•°æ®  Length:æ•°æ®é•¿åº¦		BufferPtr: data to be sent Length: data length
  * @Retval: 
  */
 void USART1_Send_ArrayU8(uint8_t *BufferPtr, uint16_t Length)
@@ -102,84 +105,126 @@ void USART1_Send_ArrayU8(uint8_t *BufferPtr, uint16_t Length)
 	}
 }
 
-//´®¿ÚÖÐ¶Ï·þÎñº¯Êý	Serial port interrupt service function
+
+static char hmi_cmd_buffer[50];
+static volatile uint8_t hmi_cmd_ready = 0;
+
+void parse_hmi_command(void); // Forward declaration
+
+/**
+ * @brief  USART1 Interrupt Service Routine.
+ * @note   Handles commands from HMI/PC Serial Assistant.
+ *         It only receives bytes, forms a command string, and sets a flag.
+ *         Actual command parsing is done in the main loop poll function.
+ */
 void USART1_IRQHandler(void)
 {
-	uint8_t Rx1_Temp = 0;
-	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
-	{
-		Rx1_Temp = USART_ReceiveData(USART1);
-		USART1_Send_U8(Rx1_Temp);
+	uint16_t usart_sr = USART1->SR;
+	uint8_t usart_dr = USART1->DR;
+
+	if ((usart_sr & USART_FLAG_RXNE) != RESET) {
+		char ch = (char)usart_dr;
+		static uint8_t idx = 0;
+
+		// Ignore line endings, good for various serial terminals
+		if (ch == '\r' || ch == '\n') return; 
+
+		if (ch == '$') {
+			idx = 0;
+			memset(hmi_cmd_buffer, 0, sizeof(hmi_cmd_buffer));
+		} else if (ch == '#') {
+			if (idx > 0) { // Ensure command is not empty
+				hmi_cmd_buffer[idx] = '\0';
+				hmi_cmd_ready = 1; // Set flag to be processed in main loop
+			}
+			idx = 0;
+		} else if (idx < sizeof(hmi_cmd_buffer) - 1) {
+			hmi_cmd_buffer[idx++] = ch;
+		}
 	}
 }
 
-// Ìí¼Óµ½ÏÖÓÐµÄusart.cÎÄ¼þÖÐ
-
-void uart3_init(u32 bound)
+/**
+ * @brief  Polls and parses commands received from the HMI (USART1).
+ * @note   This function should be called repeatedly in the main loop.
+ */
+void hmi_command_poll(void)
 {
-    GPIO_InitTypeDef GPIO_InitStructure;
-    USART_InitTypeDef USART_InitStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
+    if (!hmi_cmd_ready) return;
+    hmi_cmd_ready = 0; // Clear the flag immediately
 
-    // Ê¹ÄÜUSART3ºÍGPIOBÊ±ÖÓ
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-
-    // USART3_TX   PB.10
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-    // USART3_RX   PB.11
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-    // USART3 ÅäÖÃ
-    USART_InitStructure.USART_BaudRate = bound;
-    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-    USART_InitStructure.USART_StopBits = USART_StopBits_1;
-    USART_InitStructure.USART_Parity = USART_Parity_No;
-    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-
-    USART_Init(USART3, &USART_InitStructure);
-    
-    // ÅäÖÃUSART3ÖÐ¶Ï
-    NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-    
-    USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
-    USART_Cmd(USART3, ENABLE);
-}
-
-void USART3_Send_U8(uint8_t ch)
-{
-    while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
-    USART_SendData(USART3, ch);
-}
-
-void USART3_Send_ArrayU8(uint8_t *BufferPtr, uint16_t Length)
-{
-    while(Length--)
-    {
-        USART3_Send_U8(*BufferPtr);
-        BufferPtr++;
+    // Handle Mode Switch commands: $MODE:ROS# or $MODE:HMI#
+    if (strncmp(hmi_cmd_buffer, "MODE:", 5) == 0) {
+        if (strcmp(hmi_cmd_buffer + 5, "ROS") == 0) {
+            set_control_mode(MODE_ROS);
+        } else if (strcmp(hmi_cmd_buffer + 5, "HMI") == 0) {
+            set_control_mode(MODE_HMI);
+        }
     }
-}
-
-// USART3ÖÐ¶Ï·þÎñº¯Êý
-void USART3_IRQHandler(void)
-{
-    uint8_t Rx3_Temp = 0;
-    if(USART_GetITStatus(USART3, USART_IT_RXNE) != RESET)
-    {
-        Rx3_Temp = USART_ReceiveData(USART3);
-        // ½«´ÓÊ÷Ý®ÅÉÊÕµ½µÄÊý¾ÝÍ¨¹ýUSART1·¢ËÍµ½µçÄÔ
-        USART1_Send_U8(Rx3_Temp);
+    // Handle Manual Movement commands (only if in HMI mode)
+    // Format: $MOVE:FWD,100# $MOVE:STOP#
+    else if (get_control_mode() == MODE_HMI && strncmp(hmi_cmd_buffer, "MOVE:", 5) == 0) 
+	{
+        char* cmd = hmi_cmd_buffer + 5;
+		
+        if (strncmp(cmd, "FWD,", 4) == 0) 
+		{
+            motor_forward(atoi(cmd + 4));
+        } 
+		else if (strncmp(cmd, "BWD,", 4) == 0) 
+		{
+            motor_backward(atoi(cmd + 4));
+        } 
+		else if (strncmp(cmd, "LFT,", 4) == 0) 
+		{
+            int speed1 = 0, speed2 = 0;
+            // Use sscanf for safer parsing
+            if (sscanf(cmd + 4, "%d,%d", &speed1, &speed2) == 2) {
+			    motor_turn_left(speed1, speed2);
+            }
+        } 
+		else if (strncmp(cmd, "RGT,", 4) == 0) 
+		{
+            int speed1 = 0, speed2 = 0;
+            // Use sscanf for safer parsing
+            if (sscanf(cmd + 4, "%d,%d", &speed1, &speed2) == 2) {
+			    motor_turn_right(speed1, speed2);
+            }
+        } 
+		else if (strcmp(cmd, "STOP") == 0) 
+		{
+            motor_stop();
+        }
+    }
+    // Handle Precise Turn commands: $TURN:LEFT90# $TURN:RIGHT90# $TURN:CANCEL#
+    else if (get_control_mode() == MODE_HMI && strncmp(hmi_cmd_buffer, "TURN:", 5) == 0) 
+	{
+        char* cmd = hmi_cmd_buffer + 5;
+		
+        if (strcmp(cmd, "LEFT90") == 0) 
+		{
+            motor_turn_left_90_precise();
+        } 
+		else if (strcmp(cmd, "RIGHT90") == 0) 
+		{
+            motor_turn_right_90_precise();
+        } 
+		else if (strcmp(cmd, "CANCEL") == 0) 
+		{
+            motor_cancel_turn();
+        }
+    }
+    // Handle PID parameter adjustment: $PID:2.0,0.1,0.05#
+    else if (get_control_mode() == MODE_HMI && strncmp(hmi_cmd_buffer, "PID:", 4) == 0) 
+	{
+        char* cmd = hmi_cmd_buffer + 4;
+        float kp = 0.0f, ki = 0.0f, kd = 0.0f;
+        
+        // Use sscanf for safer parsing
+        if (sscanf(cmd, "%f,%f,%f", &kp, &ki, &kd) == 3) {
+            motor_set_turn_pid_params(kp, ki, kd);
+        } else {
+            printf("> ERROR: Invalid PID format. Use: $PID:kp,ki,kd#\r\n");
+        }
     }
 }

@@ -1,56 +1,56 @@
 #include "bsp_motor_usart.h"
 
 
-//µç»ú´®¿Ú³õÊ¼»¯	Motor serial port initialization
+//ç”µæœºä¸²å£åˆå§‹åŒ–	Motor serial port initialization
 void Motor_Usart_init (void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
-	// ´ò¿ª´®¿ÚGPIOµÄÊ±ÖÓ	Turn on the serial GPIO clock
+	// æ‰“å¼€ä¸²å£GPIOçš„æ—¶é’Ÿ	Turn on the serial GPIO clock
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 
-	// ´ò¿ª´®¿ÚÍâÉèµÄÊ±ÖÓ	Enable the clock of the serial port peripheral
+	// æ‰“å¼€ä¸²å£å¤–è®¾çš„æ—¶é’Ÿ	Enable the clock of the serial port peripheral
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
 
-	// ½«USART TxµÄGPIOÅäÖÃÎªÍÆÍì¸´ÓÃÄ£Ê½		Configure the GPIO of USART Tx to push-pull multiplexing mode
+	// å°†USART Txçš„GPIOé…ç½®ä¸ºæ¨æŒ½å¤ç”¨æ¨¡å¼		Configure the GPIO of USART Tx to push-pull multiplexing mode
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	// ½«USART RxµÄGPIOÅäÖÃÎª¸¡¿ÕÊäÈëÄ£Ê½		Configure the GPIO of USART Rx to floating input mode
+	// å°†USART Rxçš„GPIOé…ç½®ä¸ºæµ®ç©ºè¾“å…¥æ¨¡å¼		Configure the GPIO of USART Rx to floating input mode
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	//Usart2 NVIC ÅäÖÃ	Usart2 NVIC Configuration
+	//Usart2 NVIC é…ç½®	Usart2 NVIC Configuration
 	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1; //ÇÀÕ¼ÓÅÏÈ¼¶	Preemption priority
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;		  //×ÓÓÅÏÈ¼¶		Subpriority
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			  //IRQÍ¨µÀÊ¹ÄÜ	IRQ channel enable
-	NVIC_Init(&NVIC_InitStructure);							  //¸ù¾İÖ¸¶¨µÄ²ÎÊı³õÊ¼»¯NVIC¼Ä´æÆ÷	Initializes the NVIC registers according to the specified parameters
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1; //æŠ¢å ä¼˜å…ˆçº§	Preemption priority
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;		  //å­ä¼˜å…ˆçº§		Subpriority
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			  //IRQé€šé“ä½¿èƒ½	IRQ channel enable
+	NVIC_Init(&NVIC_InitStructure);							  //æ ¹æ®æŒ‡å®šçš„å‚æ•°åˆå§‹åŒ–NVICå¯„å­˜å™¨	Initializes the NVIC registers according to the specified parameters
 
 	
-	// ÅäÖÃ²¨ÌØÂÊ	Configuring the baud rate
+	// é…ç½®æ³¢ç‰¹ç‡	Configuring the baud rate
 	USART_InitStructure.USART_BaudRate = 115200;
-	// ÅäÖÃ ÕëÊı¾İ×Ö³¤	Configuration Pin Data Word Length
+	// é…ç½® é’ˆæ•°æ®å­—é•¿	Configuration Pin Data Word Length
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	// ÅäÖÃÍ£Ö¹Î»	Configuring stop bits
+	// é…ç½®åœæ­¢ä½	Configuring stop bits
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	// ÅäÖÃĞ£ÑéÎ»	Configuring the check digit
+	// é…ç½®æ ¡éªŒä½	Configuring the check digit
 	USART_InitStructure.USART_Parity = USART_Parity_No;
-	// ÅäÖÃÓ²¼şÁ÷¿ØÖÆ	Configuring Hardware Flow Control
+	// é…ç½®ç¡¬ä»¶æµæ§åˆ¶	Configuring Hardware Flow Control
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	// ÅäÖÃ¹¤×÷Ä£Ê½£¬ÊÕ·¢Ò»Æğ		Configure the working mode, send and receive together
+	// é…ç½®å·¥ä½œæ¨¡å¼ï¼Œæ”¶å‘ä¸€èµ·		Configure the working mode, send and receive together
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 
-	// Íê³É´®¿ÚµÄ³õÊ¼»¯ÅäÖÃ	Complete the initial configuration of the serial port
+	// å®Œæˆä¸²å£çš„åˆå§‹åŒ–é…ç½®	Complete the initial configuration of the serial port
 	USART_Init(USART2, &USART_InitStructure);
 
-	//¿ªÆô´®¿Ú½ÓÊÕÖĞ¶Ï	Enable serial port receive interrupt
+	//å¼€å¯ä¸²å£æ¥æ”¶ä¸­æ–­	Enable serial port receive interrupt
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
-	// Ê¹ÄÜ´®¿Ú	Enable the serial port
+	// ä½¿èƒ½ä¸²å£	Enable the serial port
 	USART_Cmd(USART2, ENABLE);
 
 }
@@ -58,10 +58,10 @@ void Motor_Usart_init (void)
 
 
 /************************************************
-º¯ÊıÃû³Æ £º Send_Motor_U8		Function name: Send_Motor_U8
-¹¦    ÄÜ £º UART2·¢ËÍÒ»¸ö×Ö·û	Function: UART2 sends a character
-²Î    Êı £º Data --- Êı¾İ		Parameter: Data --- data
-·µ »Ø Öµ £º ÎŞ					Return value: None
+å‡½æ•°åç§° ï¼š Send_Motor_U8		Function name: Send_Motor_U8
+åŠŸ    èƒ½ ï¼š UART2å‘é€ä¸€ä¸ªå­—ç¬¦	Function: UART2 sends a character
+å‚    æ•° ï¼š Data --- æ•°æ®		Parameter: Data --- data
+è¿” å› å€¼ ï¼š æ— 					Return value: None
 *************************************************/
 void Send_Motor_U8(uint8_t Data)
 {
@@ -70,11 +70,11 @@ void Send_Motor_U8(uint8_t Data)
 }
 
 /************************************************
-º¯ÊıÃû³Æ £º Send_Motor_ArrayU8	Function name: Send_Motor_ArrayU8
-¹¦    ÄÜ £º ´®¿Ú1·¢ËÍN¸ö×Ö·û		Function: Serial port 1 sends N characters
-²Î    Êı £º pData ---- ×Ö·û´®	Parameter: pData ---- string
-            Length --- ³¤¶È		Length --- length
-·µ »Ø Öµ £º ÎŞ					Return value: None
+å‡½æ•°åç§° ï¼š Send_Motor_ArrayU8	Function name: Send_Motor_ArrayU8
+åŠŸ    èƒ½ ï¼š ä¸²å£1å‘é€Nä¸ªå­—ç¬¦		Function: Serial port 1 sends N characters
+å‚    æ•° ï¼š pData ---- å­—ç¬¦ä¸²	Parameter: pData ---- string
+            Length --- é•¿åº¦		Length --- length
+è¿” å› å€¼ ï¼š æ— 					Return value: None
 *************************************************/
 void Send_Motor_ArrayU8(uint8_t *pData, uint16_t Length)
 {
@@ -86,18 +86,18 @@ void Send_Motor_ArrayU8(uint8_t *pData, uint16_t Length)
 }
 
 
-/*  ´®¿ÚÖĞ¶Ï½ÓÊÕ´¦Àí */
+/*  ä¸²å£ä¸­æ–­æ¥æ”¶å¤„ç† */
 /* Serial port interrupt reception processing */
 void USART2_IRQHandler(void)
 {
 	uint8_t Rx2_Temp = 0;
-	/* ¶ÁÊı¾İ»áÇå¿ÕÖĞ¶ÏÎ» */
+	/* è¯»æ•°æ®ä¼šæ¸…ç©ºä¸­æ–­ä½ */
 	/*Reading data will clear the interrupt bit*/
 	while (USART_GetFlagStatus(USART2, USART_FLAG_RXNE) == RESET);
 	
 	Rx2_Temp = USART_ReceiveData(USART2);
 	
-	//´¦Àí	deal with
+	//å¤„ç†	deal with
 	Deal_Control_Rxtemp(Rx2_Temp);
 
 }

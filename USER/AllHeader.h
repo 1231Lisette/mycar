@@ -2,7 +2,7 @@
 #define __ALLHEADER_H
 
 
-//ͷ�ļ�	Header Files
+//头文件	Header Files
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -25,6 +25,15 @@ extern uint16_t times;
 
 #include "bsp_timer.h"
 
+#include "usart3.h"
+
+#include "init.h"
+#include "mode_choose.h"
+#include "motor_control.h"
+#include "navigation.h"
+#include "gpio_control.h"
+#include "pc_command_parser.h"
+#include "servo_sg90.h"
 
 
 #endif

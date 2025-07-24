@@ -400,6 +400,46 @@
               <FileType>5</FileType>
               <FilePath>.\myenum.h</FilePath>
             </File>
+            <File>
+              <FileName>init.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\init.c</FilePath>
+            </File>
+            <File>
+              <FileName>init.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\init.h</FilePath>
+            </File>
+            <File>
+              <FileName>mode_choose.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\mode_choose.c</FilePath>
+            </File>
+            <File>
+              <FileName>mode_choose.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\mode_choose.h</FilePath>
+            </File>
+            <File>
+              <FileName>motor_control.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\motor_control.c</FilePath>
+            </File>
+            <File>
+              <FileName>motor_control.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\motor_control.h</FilePath>
+            </File>
+            <File>
+              <FileName>navigation.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\navigation.c</FilePath>
+            </File>
+            <File>
+              <FileName>navigation.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\navigation.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -579,6 +619,91 @@
               <FileName>usart.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\BSP\Usart1\usart.h</FilePath>
+            </File>
+            <File>
+              <FileName>app_motor_usart.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\motor_model\app_motor_usart.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_motor_usart.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\motor_model\bsp_motor_usart.h</FilePath>
+            </File>
+            <File>
+              <FileName>delay.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\Delay\delay.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_timer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\Timer\bsp_timer.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\bsp.h</FilePath>
+            </File>
+            <File>
+              <FileName>usart3.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\Usart1\usart3.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart3.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\Usart1\usart3.h</FilePath>
+            </File>
+            <File>
+              <FileName>pid_config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\motor_model\pid_config.c</FilePath>
+            </File>
+            <File>
+              <FileName>pid_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\motor_model\pid_config.h</FilePath>
+            </File>
+            <File>
+              <FileName>debug_tools.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\debug_tools.c</FilePath>
+            </File>
+            <File>
+              <FileName>debug_tools.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\debug_tools.h</FilePath>
+            </File>
+            <File>
+              <FileName>gpio_control.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\gpio_control.c</FilePath>
+            </File>
+            <File>
+              <FileName>gpio_control.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\gpio_control.h</FilePath>
+            </File>
+            <File>
+              <FileName>pc_command_parser.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\pc_command_parser.c</FilePath>
+            </File>
+            <File>
+              <FileName>pc_command_parser.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\pc_command_parser.h</FilePath>
+            </File>
+            <File>
+              <FileName>servo_sg90.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\servo_sg90.c</FilePath>
+            </File>
+            <File>
+              <FileName>servo_sg90.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\servo_sg90.h</FilePath>
             </File>
           </Files>
         </Group>

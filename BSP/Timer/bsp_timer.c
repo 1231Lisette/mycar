@@ -1,18 +1,28 @@
 #include "bsp_timer.h"
 
+// å®šä¹‰ç”± `AllHeader.h` å£°æ˜çš„å…¨å±€å˜é‡ `times`
+uint16_t times = 0;
 
-static u16 stop_time = 0;//ÑÓ³ÙÊ±¼ä  delay time
+// å…¨å±€å˜é‡ï¼Œç”¨äºæä¾›ç±»ä¼¼HALåº“çš„æ¯«ç§’çº§ç³»ç»Ÿæ—¶é’Ÿ
+volatile uint32_t g_ms_tick = 0;
 
+static u16 stop_time = 0;//å»¶è¿Ÿæ—¶é—´  delay time
 
-//¶¨Ê±Æ÷6×öÑÓ³Ù 10msµÄÑÓ³Ù ´Ë·½·¨±Èdelay×¼È·
+// è·å–ç³»ç»Ÿè¿è¡Œæ—¶é’Ÿï¼ˆæ¯«ç§’ï¼‰
+uint32_t HAL_GetTick(void)
+{
+	return g_ms_tick;
+}
+
+//å®šæ—¶å™¨6åšå»¶è¿Ÿ 10msçš„å»¶è¿Ÿ æ­¤æ–¹æ³•æ¯”delayå‡†ç¡®
 //Timer 6 has a delay of 10ms. This method is more accurate than delay
 void delay_time(u16 time)
 {
 	stop_time = time;
-	while(stop_time);//ËÀµÈ	wait
+	while(stop_time);//æ­»ç­‰ Wait
 }
 
-//ÑÓ³Ù1s  Delay 1s
+//å»¶è¿Ÿ1s  Unit second
 void my_delay(u16 s)//s
 {
 	for(int i = 0;i<s;i++)
@@ -26,46 +36,46 @@ void my_delay(u16 s)//s
 Function function: TIM3 initialization, timed for 10 milliseconds
 Entrance parameters: None
 Return value: None
-º¯Êı¹¦ÄÜ£ºTIM3³õÊ¼»¯£¬¶¨Ê±10ºÁÃë
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šTIM3åˆå§‹åŒ–ï¼Œå®šæ—¶10æ¯«ç§’
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void TIM3_Init(void)
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); //Ê¹ÄÜ¶¨Ê±Æ÷µÄÊ±ÖÓ  Enable the clock of the timer
-	TIM_TimeBaseStructure.TIM_Prescaler = 7199;			 // Ô¤·ÖÆµÆ÷  Prescaler
-	TIM_TimeBaseStructure.TIM_Period = 99;				 //Éè¶¨¼ÆÊıÆ÷×Ô¶¯ÖØ×°Öµ  Set the automatic reset value of the counter
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE); //ä½¿èƒ½å®šæ—¶å™¨çš„æ—¶é’Ÿ  Enable the clock of the timer
+	TIM_TimeBaseStructure.TIM_Prescaler = 7199;			 // é¢„åˆ†é¢‘å™¨  Prescaler
+	TIM_TimeBaseStructure.TIM_Period = 99;				 //è®¾å®šè®¡æ•°å™¨è‡ªåŠ¨é‡è£…å€¼  Set the automatic reset value of the counter
 	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
-	TIM_ClearFlag(TIM3, TIM_FLAG_Update);                //Çå³ıTIMµÄ¸üĞÂ±êÖ¾Î» Clear the update flag of TIM
+	TIM_ClearFlag(TIM3, TIM_FLAG_Update);                //æ¸…é™¤TIMçš„æ›´æ–°æ ‡å¿—ä½ Clear the update flag of TIM
 	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
 
-	//ÖĞ¶ÏÓÅÏÈ¼¶NVICÉèÖÃ	Interrupt priority NVIC setting
-	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;			  //TIM6ÖĞ¶Ï		TIM6 interrupt
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 4; //ÏÈÕ¼ÓÅÏÈ¼¶4¼¶	Preemption priority level 4
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;		  //´ÓÓÅÏÈ¼¶2¼¶		From priority level 2
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			  //IRQÍ¨µÀ±»Ê¹ÄÜ	IRQ channel is enabled
-	NVIC_Init(&NVIC_InitStructure);							  //³õÊ¼»¯NVIC¼Ä´æÆ÷	Initialize NVIC registers
+	//ä¸­æ–­ä¼˜å…ˆçº§NVICè®¾ç½®
+	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;			  //TIM6ä¸­æ–­	TIM6 interrupt
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 4; //å…ˆå ä¼˜å…ˆçº§4çº§	Preempts priority level 4
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;		  //ä»ä¼˜å…ˆçº§2çº§	From priority level 2
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			  //IRQé€šé“è¢«ä½¿èƒ½	IRQ channel is enabled
+	NVIC_Init(&NVIC_InitStructure);							  //åˆå§‹åŒ–NVICå¯„å­˜å™¨	Initializes NVIC registers
 
 	TIM_Cmd(TIM3, ENABLE);
 }
 
 
-// TIM3ÖĞ¶Ï //TIM3 Interrupt service
+// TIM3ä¸­æ–­ //TIM3 Interrupt service
 void TIM3_IRQHandler(void)
 {
-	if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET) //¼ì²éTIM¸üĞÂÖĞ¶Ï·¢ÉúÓë·ñ	Check whether TIM update interruption occurs
+	if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET) //æ£€æŸ¥TIMæ›´æ–°ä¸­æ–­å‘ç”Ÿä¸å¦	Check whether TIM update interrupt occurs
 	{
-		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);    //Çå³ıTIMx¸üĞÂÖĞ¶Ï±êÖ¾	Clear TIMx update interrupt flag
+		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);    //æ¸…é™¤TIMxæ›´æ–°ä¸­æ–­æ ‡å¿—	Clear TIMx update interrupt flag
 
 		times++;
+		g_ms_tick += 10; // æ¯10msä¸­æ–­ï¼Œç³»ç»Ÿæ—¶é’Ÿå¢åŠ 10ms
+		
 		if(stop_time>0)
 		{
 			stop_time --;
 		}
-		
 	}
-	
 }
 
